@@ -35,4 +35,5 @@ next-env.d.ts
 
 # cockroachdb
 /cockroach*
-/db
+/cockroach-data*
+/db*
