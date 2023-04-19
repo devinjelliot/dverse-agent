@@ -13,7 +13,7 @@
     "@chatscope/chat-ui-kit-react": "^1.10.1",
     "@fingerprintjs/fingerprintjs-pro-react": "^2.3.0",
     "@pinecone-database/pinecone": "^0.0.10",
-    "ably": "^1.2.5-beta.1",
+    "ably": "^1.2.39",
     "bottleneck": "^2.19.5",
     "cheerio": "^1.0.0-rc.12",
     "langchain": "^0.0.30",

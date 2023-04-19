@@ -5,13 +5,14 @@ import { configureAbly } from "@ably-labs/react-hooks";
 const prefix = process.env.API_ROOT || "";
 
 const clientId =
-  Math.random().toString(36).substring(2, 15) +
-  Math.random().toString(36).substring(2, 15);
+Math.random().toString(36).substring(2, 15) +
+Math.random().toString(36).substring(2, 15);
 
 configureAbly({
   authUrl: `${prefix}/api/createTokenRequest?clientId=${clientId}`,
   clientId: clientId,
 });
+console.log("clientId here", clientId);
 
 const fpjsPublicApiKey = process.env.FINGERPRINT as string;
 

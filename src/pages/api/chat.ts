@@ -1,4 +1,13 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+// This is the API route that handles the chatbot interaction
+// It is called by the client-side chatbot component
+// It uses the Pinecone index to find documents that are relevant to the user's inquiry
+// It then uses the Langchain library to improve the user's prompt and generate a response
+// It uses the Summarizer library to summarize the documents that are relevant to the user's inquiry
+// It uses the Ably library to stream the chatbot's response to the client-side chatbot component
+// It uses the Pinecone library to query the Pinecone index
+// It uses the Langchain library to improve the user's prompt and generate a response
+// pages/api/chat.ts
 import { PineconeClient } from "@pinecone-database/pinecone";
 import * as Ably from 'ably';
 import { CallbackManager } from "langchain/callbacks";
@@ -26,8 +35,9 @@ const initPineconeClient = async () => {
     apiKey: process.env.PINECONE_API_KEY!,
   });
 }
-
-const ably = new Ably.Realtime({ key: process.env.ABLY_API_KEY });
+const ably = new Ably.Realtime({ 
+  key: process.env.ABLY_API_KEY,
+});
 
 const handleRequest = async ({ prompt, userId }: { prompt: string, userId: string }) => {
   if (!pinecone) {
@@ -93,12 +103,6 @@ const handleRequest = async ({ prompt, userId }: { prompt: string, userId: strin
 
     console.log(urls)
 
-    // const fullDocuments = matches && Array.from(new Set(matches.map(match => {
-    //   const metadata = match.metadata as Metadata
-    //   const { text } = metadata
-    //   return text
-    // })))
-
     const fullDocuments = matches && Array.from(
       matches.reduce((map, match) => {
         const metadata = match.metadata as Metadata;
@@ -115,9 +119,6 @@ const handleRequest = async ({ prompt, userId }: { prompt: string, userId: strin
       const { chunk } = metadata
       return chunk
     })))
-
-    // const fullDocuments = urls && await getDocumentsByUrl(urls)
-    // console.log(fullDocuments)
 
     channel.publish({
       data: {
@@ -139,8 +140,6 @@ const handleRequest = async ({ prompt, userId }: { prompt: string, userId: strin
 
     const summary = await summarizeLongDocument(fullDocuments!.join("\n"), inquiry, onSummaryDone)
     console.log(summary)
-
-    // const summary = chunkedDocs!.join("\n")
 
     channel.publish({
       data: {
@@ -206,6 +205,12 @@ export default async function handler(
 ) {
   const { body } = req;
   const { prompt, userId } = body;
+  
+  if (!userId) {
+    res.status(400).json({ "error": "User ID is missing or undefined" });
+    return;
+  }
+
   await handleRequest({ prompt, userId })
   res.status(200).json({ "message": "started" })
 }
