@@ -1,3 +1,4 @@
+// This file is required by Next.js to render the page on the server.
 import { Html, Head, Main, NextScript } from "next/document";
 
 export default function Document() {

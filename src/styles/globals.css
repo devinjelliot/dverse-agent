@@ -1,3 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+.message-input-container {
+  @apply fixed inset-x-0 bottom-0 flex justify-center pb-12;
+  z-index: 10;
+  padding: 4%;
+  width: 50%;
+  min-width: 50%;
+  max-width: 75%;
+}
+
+.fixed-input {
+  position: fixed;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  max-width: 75%;
+  padding: 50%;
+}
+
+.fixed-output {
+  position: fixed;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  max-width: 75%;
+  padding: 50%;
+}
+
+.radial-gradient-bg {
+  background-image: radial-gradient(50% 10906.51% at 50% 49.57%, #FFFFFF 0%, rgba(145, 145, 145, 0.867345) 26.97%, rgba(31, 31, 31, 0.73) 83.74%, rgba(31, 31, 31, 0.86) 96.7%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes scrolling-banner {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.scrolling-banner {
+  display: flex;
+  animation: scrolling-banner 40s linear infinite;
+  animation-delay: 2s;
+}
+
+.scrolling-container {
+  position: relative;
+  width: 100%;
+  mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #1f1f1f 5%,
+      #1f1f1f 95%,
+      transparent 100%
+    );
+}
+
+.word-graph-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Make sure it's behind other containers */
+  pointer-events: none; /* Allow interactions with elements underneath */
+}
+
+/* #graph svg {
+  background-color: transparent;
+} */
+
+
+
 html {
   font-family: "mediumllweb", "sans-serif";
 }

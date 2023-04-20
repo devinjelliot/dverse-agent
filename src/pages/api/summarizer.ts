@@ -1,3 +1,12 @@
+// This is a Next.js API route. Learn more: https://nextjs.org/docs/api-routes/introduction
+// This is the API route that handles the chatbot interaction
+// It is called by the client-side chatbot component
+// It uses the Pinecone index to find documents that are relevant to the user's inquiry
+// It then uses the Langchain library to improve the user's prompt and generate a response
+// It uses the Summarizer library to summarize the documents that are relevant to the user's inquiry
+// It uses the Ably library to stream the chatbot's response to the client-side chatbot component
+// It uses the Pinecone library to query the Pinecone index
+// src/pages/api/chat.ts
 import { LLMChain, PromptTemplate } from "langchain";
 import { OpenAI } from "langchain/llms";
 import { templates } from './templates';
