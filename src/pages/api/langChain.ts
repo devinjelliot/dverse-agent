@@ -1,3 +1,5 @@
+// This file is used to create the langchain chain and call it
+// src/pages/api/langChain.ts
 import { LLMChain } from "langchain/chains";
 import { PromptTemplate } from "langchain/prompts";
 import { OpenAI } from "langchain/llms";

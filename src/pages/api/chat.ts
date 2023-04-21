@@ -1,15 +1,12 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-// This is the API route that handles the chatbot interaction
-// It is called by the client-side chatbot component
-// It uses the Pinecone index to find documents that are relevant to the user's inquiry
-// It then uses the Langchain library to improve the user's prompt and generate a response
-// It uses the Summarizer library to summarize the documents that are relevant to the user's inquiry
-// It uses the Ably library to stream the chatbot's response to the client-side chatbot component
-// It uses the Pinecone library to query the Pinecone index
-// It uses the Langchain library to improve the user's prompt and generate a response
+// This is the API endpoint that handles the chatbot
+// It also uses the Ably realtime messaging service to stream
+// the response to the client
+// The client is a React app that uses the Ably React Hooks
+// library to subscribe to the Ably channel and display the
+// response in real time
 // pages/api/chat.ts
 import { PineconeClient } from "@pinecone-database/pinecone";
-import * as Ably from 'ably';
+import Ably ,{ Realtime, Types } from "ably/promises";
 import { CallbackManager } from "langchain/callbacks";
 import { LLMChain } from "langchain/chains";
 import { ChatOpenAI } from "langchain/chat_models";
@@ -19,14 +16,13 @@ import { PromptTemplate } from "langchain/prompts";
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { uuid } from 'uuidv4';
 import { summarizeLongDocument } from './summarizer';
-
 import { ConversationLog } from './conversationLog';
 import { Metadata, getMatchesFromEmbeddings } from './matches';
 import { templates } from './templates';
-
+import { initAblyClient, createAblyChannel } from "../../utils/ablyHelper";
 
 const llm = new OpenAI({});
-let pinecone: PineconeClient | null = null
+let pinecone: PineconeClient | null = null;
 
 const initPineconeClient = async () => {
   pinecone = new PineconeClient();
@@ -34,26 +30,41 @@ const initPineconeClient = async () => {
     environment: process.env.PINECONE_ENVIRONMENT!,
     apiKey: process.env.PINECONE_API_KEY!,
   });
-}
-const ably = new Ably.Realtime({ 
-  key: process.env.ABLY_API_KEY,
-});
+};
 
-const handleRequest = async ({ prompt, userId }: { prompt: string, userId: string }) => {
+interface HandleRequestParams {
+  prompt: string;
+  clientId: string;
+  authUrl: string;
+}
+
+const handleRequest = async (params: HandleRequestParams) => {
+  const { prompt, clientId, authUrl } = params;
+
   if (!pinecone) {
     await initPineconeClient();
   }
 
   let summarizedCount = 0;
+  //let ably: Ably.Realtime | null = null;
 
   try {
-    const channel = ably.channels.get(userId);
-    const interactionId = uuid()
+    const ably = new Ably.Realtime({ authUrl: '/api/createTokenRequest'})
+    //const ablyClient = initAblyClient(authUrl, clientId);
+    console.log(`fuck me for client ID ${clientId}`);
+    console.log(`Ably client initialized for client ID ${clientId}`);
+    console.log(`Ably client initialized for client ID ${authUrl}`);
+    const channel = createAblyChannel(ably, `clientId:${clientId}`) as Types.RealtimeChannelPromise;
+    const interactionId = uuid();
 
     // Retrieve the conversation log and save the user's prompt
-    const conversationLog = new ConversationLog(userId)
-    const conversationHistory = await conversationLog.getConversation({ limit: 10 })
-    await conversationLog.addEntry({ entry: prompt, speaker: "user" })
+    const conversationLog = new ConversationLog(clientId);
+    const conversationHistory = await conversationLog.getConversation({ limit: 10 });
+    await conversationLog.addEntry({ entry: prompt, speaker: "user" });
+
+    const publishStatus = async (message: string) => {
+      await publishToAblyChannel(channel, "status", { message });
+    };
 
     // Build an LLM chain that will improve the user prompt
     const inquiryChain = new LLMChain({
@@ -62,46 +73,37 @@ const handleRequest = async ({ prompt, userId }: { prompt: string, userId: strin
         inputVariables: ["userPrompt", "conversationHistory"],
       })
     });
-    const inquiryChainResult = await inquiryChain.call({ userPrompt: prompt, conversationHistory })
-    const inquiry = inquiryChainResult.text
+    
+    const inquiryChainResult = await inquiryChain.call({ userPrompt: prompt, conversationHistory });
+    const inquiry = inquiryChainResult.text;
 
     // Embed the user's intent and query the Pinecone index
     const embedder = new OpenAIEmbeddings({
       modelName: "text-embedding-ada-002"
     });
-    channel.publish({
-      data: {
-        event: "status",
-        message: "Embedding your inquiry...",
-      }
-    })
+
+    const publishToAblyChannel = async (
+      channel: Types.RealtimeChannelPromise, 
+      name: string, 
+      data: any) => {
+        try {
+          await channel.publish(name, data);
+        } catch (error) {
+          console.error(error);
+        }
+    };
 
     const embeddings = await embedder.embedQuery(inquiry);
-    channel.publish({
-      data: {
-        event: "status",
-        message: "Finding matches...",
-      }
-    })
+    await publishStatus("Embedding your inquiry...");
 
     const matches = await getMatchesFromEmbeddings(embeddings, pinecone!, 3);
-
-    channel.publish({
-      data: {
-        event: "status",
-        message: `Found ${matches?.length} matches`,
-      }
-    })
-
-    // const urls = docs && Array.from(new Set(docs.map(doc => doc.metadata.url)))
+    await publishStatus("Finding matches...");
 
     const urls = matches && Array.from(new Set(matches.map(match => {
-      const metadata = match.metadata as Metadata
-      const { url } = metadata
-      return url
-    })))
-
-    console.log(urls)
+      const metadata = match.metadata as Metadata;
+      const { url } = metadata;
+      return url;
+    })));
 
     const fullDocuments = matches && Array.from(
       matches.reduce((map, match) => {
@@ -115,44 +117,26 @@ const handleRequest = async ({ prompt, userId }: { prompt: string, userId: strin
     ).map(([_, text]) => text);
 
     const chunkedDocs = matches && Array.from(new Set(matches.map(match => {
-      const metadata = match.metadata as Metadata
-      const { chunk } = metadata
-      return chunk
-    })))
-
-    channel.publish({
-      data: {
-        event: "status",
-        message: `Documents are summarized (they are ${fullDocuments?.join("").length} long)`,
-      }
-    })
+      const metadata = match.metadata as Metadata;
+      const { chunk } = metadata;
+      return chunk;
+    })));
 
     const onSummaryDone = (summary: string) => {
-      summarizedCount += 1
+      summarizedCount += 1;
+      publishStatus(`Done summarizing ${summarizedCount} documents`);
+    };
 
-      channel.publish({
-        data: {
-          event: "status",
-          message: `Done summarizing ${summarizedCount} documents`,
-        }
-      })
-    }
+    const summary = await summarizeLongDocument(fullDocuments!.join("\n"), inquiry, onSummaryDone);
+    console.log(summary);
 
-    const summary = await summarizeLongDocument(fullDocuments!.join("\n"), inquiry, onSummaryDone)
-    console.log(summary)
+    await publishStatus("Documents are summarized. Forming final answer...");
 
-    channel.publish({
-      data: {
-        event: "status",
-        message: `Documents are summarized. Forming final answer...`,
-      }
-    })
     // Prepare a QA chain and call it with the document summaries and the user's prompt
     const promptTemplate = new PromptTemplate({
       template: templates.qaTemplate,
       inputVariables: ["summaries", "question", "conversationHistory", "urls"],
     });
-
 
     const chat = new ChatOpenAI({
       streaming: true,
@@ -160,24 +144,24 @@ const handleRequest = async ({ prompt, userId }: { prompt: string, userId: strin
       modelName: "gpt-3.5-turbo",
       callbackManager: CallbackManager.fromHandlers({
         async handleLLMNewToken(token) {
-          console.log(token)
+          console.log(token);
           channel.publish({
             data: {
               event: "response",
               token: token,
-              interactionId
-            }
-          })
+              interactionId,
+            },
+          });
         },
         async handleLLMEnd(result) {
           channel.publish({
             data: {
               event: "responseEnd",
               token: "END",
-              interactionId
-            }
-          })
-        }
+              interactionId,
+            },
+          });
+        },
       }),
     });
 
@@ -190,27 +174,28 @@ const handleRequest = async ({ prompt, userId }: { prompt: string, userId: strin
       summaries: summary,
       question: prompt,
       conversationHistory,
-      urls
+      urls,
     });
 
   } catch (error) {
     //@ts-ignore
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const { body } = req;
-  const { prompt, userId } = body;
-  
-  if (!userId) {
-    res.status(400).json({ "error": "User ID is missing or undefined" });
+  const { prompt, authUrl, clientId } = body;
+
+  if (!clientId) {
+    res.status(400).json({ "error": "Client ID is missing or undefined" });
     return;
   }
-
-  await handleRequest({ prompt, userId })
-  res.status(200).json({ "message": "started" })
+  
+  await handleRequest({ prompt, clientId, authUrl });
+  res.status(200).json({ "message": "started" });
 }
+

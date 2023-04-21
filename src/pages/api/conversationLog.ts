@@ -1,3 +1,7 @@
+// This file is used to store the conversation history in the database
+// It uses the Sequelize ORM to interact with the database
+// It uses the pg module to interact with CockroachDB
+// src/pages/api/conversationLog.ts
 import * as pg from 'pg';
 import { Sequelize } from 'sequelize-cockroachdb';
 

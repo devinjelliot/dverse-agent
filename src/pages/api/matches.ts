@@ -1,3 +1,7 @@
+// This is an API route that returns the top K matches from the Pinecone index
+// It is called by the client-side chatbot component
+// It uses the Pinecone library to query the index
+// src/pages/api/matches.ts
 import { PineconeClient, ScoredVector } from "@pinecone-database/pinecone";
 
 export type Metadata = {

@@ -9,28 +9,19 @@ import type { AppProps } from "next/app";
 import { FpjsProvider } from "@fingerprintjs/fingerprintjs-pro-react";
 import { configureAbly } from "@ably-labs/react-hooks";
 import "../styles/globals.css";
+
+const fpjsPublicApiKey: string = process.env.FINGERPRINT as string;
+
 const prefix = process.env.API_ROOT || "";
-
-const clientId =
-Math.random().toString(36).substring(2, 15) +
-Math.random().toString(36).substring(2, 15);
-
-configureAbly({
-  authUrl: `${prefix}/api/createTokenRequest?clientId=${clientId}`,
-  clientId: clientId,
-});
-console.log("clientId here", clientId);
-
-const fpjsPublicApiKey = process.env.FINGERPRINT as string;
+const clientId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+configureAbly({ authUrl: `${prefix}/api/createTokenRequest`, clientId: clientId });
+console.log("clientId apptsx: ", clientId);
 
 export default function App({ Component, pageProps }: AppProps) {
+
   return (
-    <FpjsProvider
-      loadOptions={{
-        apiKey: fpjsPublicApiKey,
-      }}
-    >
-      <Component {...pageProps} />
+    <FpjsProvider loadOptions={{ apiKey: fpjsPublicApiKey }}>
+        <Component {...pageProps} />
     </FpjsProvider>
   );
 }

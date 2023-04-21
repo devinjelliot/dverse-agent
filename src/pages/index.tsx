@@ -2,32 +2,15 @@
 // It uses the @ably-labs/react-hooks package to subscribe to the Ably channel for the current user and update the conversation state accordingly. 
 // It also uses the @fingerprintjs/fingerprintjs-pro-react package to get the visitor ID for the current user.
 // The visitor ID is used to identify the user in the Ably channel.
-// The chatbot demo uses the @chatscope/chat-ui-kit-react package to render the chat UI.
-// The chatbot demo uses the @chatscope/chat-ui-kit-styles package to style the chat UI.
-// The chatbot demo uses the timeago.js package to format the timestamps of the messages.
-// The chatbot demo uses the ReactMarkdown package to render the markdown responses from the chatbot.
 // src/pages/index.tsx
 import Head from "next/head";
 import { useState } from "react";
 import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
-import ReactMarkdown from "react-markdown";
-import * as timeago from "timeago.js";
 import "tailwindcss/tailwind.css";
 import Navbar from '../components/navbar';
 import InputBox from "../components/inputBox";
 import OutputBox from "../components/outputBox";
 
-import {
-  MainContainer,
-  ChatContainer,
-  MessageList,
-  Message,
-  MessageInput,
-  ConversationHeader,
-  TypingIndicator,
-} from "@chatscope/chat-ui-kit-react";
-
-import styles from "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import { useChannel } from "@ably-labs/react-hooks";
 import { Types } from "ably";
 import WordGraph from "components/wordGraph";
@@ -43,7 +26,6 @@ type ConversationEntry = {
 type request = {
   prompt: string;
 };
-
 
 const updateChatbotMessage = (
   conversation: ConversationEntry[],
@@ -117,7 +99,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: text, userId: visitorData?.visitorId }),
+        body: JSON.stringify({ prompt: text, clientId: visitorData?.visitorId }),
       });
 
       await response.json();

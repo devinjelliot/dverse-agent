@@ -1,3 +1,5 @@
+// This file is used to crawl a website and index the content into Pinecone
+// src/pages/api/crawl.ts
 import { PineconeClient, Vector } from "@pinecone-database/pinecone";
 import Bottleneck from "bottleneck";
 import { Document } from "langchain/document";
