@@ -103,6 +103,7 @@ export default function Home() {
         },
         body: JSON.stringify({ prompt: text, clientId: visitorData?.visitorId }),
       });
+      console.log("DOUBLE QUOTES?:", visitorData?.visitorId),
 
       await response.json();
     } catch (error) {

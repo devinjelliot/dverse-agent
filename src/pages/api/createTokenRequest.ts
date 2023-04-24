@@ -14,6 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const ably = new Ably.Rest({key: process.env.ABLY_API_KEY as string});
+    console.log("DB Quote?:", process.env.ABLY_API_KEY);
     const tokenRequestData = await ably.auth.createTokenRequest({ clientId: clientId });
     res.status(200).send(tokenRequestData);
   } catch (error) {
