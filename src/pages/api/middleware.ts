@@ -6,7 +6,7 @@ const middleware = nextConnect();
 
 middleware.use(
   cors({
-    origin: '*', // You can set specific origins here, like 'https://example.com'
+    origin: 'https://backpack-brain.vercel.app', // You can set specific origins here, like 'https://example.com'
     methods: ['GET', 'POST'], // You can specify allowed methods
   })
 );
