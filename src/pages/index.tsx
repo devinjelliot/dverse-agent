@@ -16,6 +16,8 @@ import { Types } from "ably";
 import WordGraph from "components/wordGraph";
 import { dummyGraph } from "models/wordGraph";
 
+const API_ROOT = process.env.NEXT_PUBLIC_API_ROOT;
+
 type ConversationEntry = {
   message: string;
   speaker: "bot" | "user";
@@ -94,7 +96,7 @@ export default function Home() {
     ]);
     try {
       setBotIsTyping(true);
-      const response = await fetch("/api/chat", {
+      const response = await fetch(`${API_ROOT}/createTokenRequest`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

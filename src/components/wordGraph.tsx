@@ -152,7 +152,7 @@ const WordGraph: React.FC<WordGraphProps> = ({ data }) => {
 
     useEffect(() => {
       renderGraph(data);
-    }, [data]); // Only re-run the effect if data changes
+    }, [renderGraph]); // Only re-run the effect if data changes
 
   return (
     <div>

@@ -63,7 +63,6 @@ const handleRequest = async (params: HandleRequestParams) => {
 
   try {
     const ably = new Ably.Realtime({ authUrl})
-    //const ablyClient = initAblyClient(authUrl, clientId);
     console.log(`fuck me for client ID ${clientId}`);
     console.log(`Ably client initialized for client ID ${clientId}`);
     console.log(`Ably client initialized for client ID ${authUrl}`);

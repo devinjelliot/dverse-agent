@@ -12,10 +12,10 @@ import "../styles/globals.css";
 
 const fpjsPublicApiKey: string = process.env.FINGERPRINT as string;
 
-const prefix = process.env.API_ROOT || "";
+const prefix = process.env.NEXT_PUBLIC_API_ROOT || "";
 const clientId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-configureAbly({ authUrl: `${prefix}/api/createTokenRequest`, clientId: clientId, log: {level: 4} });
+configureAbly({ authUrl: `${prefix}/createTokenRequest`, clientId: clientId, log: {level: 4} });
 console.log("clientId apptsx: ", clientId);
 
 export default function App({ Component, pageProps }: AppProps) {
