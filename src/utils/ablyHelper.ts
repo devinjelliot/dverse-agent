@@ -16,7 +16,7 @@ const publishToAblyChannel = async (
     await channel.publish(eventName, data);
   } catch (err) {
     const error = err as Ably.Types.ErrorInfo;
-    console.error(`Error publishing to Ably channel: ${error.message}`);
+    console.error(`This msg from ablyHelper: ${error.message}`);
     throw err;
   }
 };
