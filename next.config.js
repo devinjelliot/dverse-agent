@@ -1,6 +1,3 @@
-const { SentryWebpackPlugin } = require("@sentry/webpack-plugin");
-const { version } = require("./package.json");
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -23,21 +20,6 @@ const nextConfig = {
         ],
       },
     ];
-  },
-  webpack: (config, { isServer, buildId }) => {
-    if (!isServer) {
-      config.plugins.push(
-        new SentryWebpackPlugin({
-          include: ".next",
-          ignore: ["node_modules"],
-          urlPrefix: "~/_next",
-          release: `${version}-${buildId}`,
-          configFile: "sentry.client.config.js",
-        })
-      );
-    }
-
-    return config;
   },
 };
 
