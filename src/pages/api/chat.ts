@@ -19,10 +19,11 @@ import { summarizeLongDocument } from './summarizer';
 import { ConversationLog } from './conversationLog';
 import { Metadata, getMatchesFromEmbeddings } from './matches';
 import { templates } from './templates';
-import { initAblyClient, createAblyChannel } from "../../utils/ablyHelper";
+import { createAblyChannel } from "../../utils/ablyHelper";
 
 const llm = new OpenAI({});
 let pinecone: PineconeClient | null = null;
+
 
 const initPineconeClient = async () => {
   pinecone = new PineconeClient();
@@ -38,6 +39,18 @@ interface HandleRequestParams {
   authUrl: string;
 }
 
+const publishToAblyChannel = async (
+  channel: Types.RealtimeChannelPromise, 
+  name: string, 
+  data: any) => {
+    try {
+      await channel.publish(name, data);
+      console.log("channel created:", channel);
+    } catch (error) {
+      console.error(error);
+    }
+};
+
 const handleRequest = async (params: HandleRequestParams) => {
   const { prompt, clientId, authUrl } = params;
 
@@ -49,7 +62,7 @@ const handleRequest = async (params: HandleRequestParams) => {
   //let ably: Ably.Realtime | null = null;
 
   try {
-    const ably = new Ably.Realtime({ authUrl: '/api/createTokenRequest'})
+    const ably = new Ably.Realtime({ authUrl})
     //const ablyClient = initAblyClient(authUrl, clientId);
     console.log(`fuck me for client ID ${clientId}`);
     console.log(`Ably client initialized for client ID ${clientId}`);
@@ -82,16 +95,7 @@ const handleRequest = async (params: HandleRequestParams) => {
       modelName: "text-embedding-ada-002"
     });
 
-    const publishToAblyChannel = async (
-      channel: Types.RealtimeChannelPromise, 
-      name: string, 
-      data: any) => {
-        try {
-          await channel.publish(name, data);
-        } catch (error) {
-          console.error(error);
-        }
-    };
+
 
     const embeddings = await embedder.embedQuery(inquiry);
     await publishStatus("Embedding your inquiry...");

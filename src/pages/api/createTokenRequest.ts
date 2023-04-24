@@ -11,12 +11,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 
   try {
-    const ably = new Ably.Realtime({key: process.env.ABLY_API_KEY as string});
+    const ably = new Ably.Rest({key: process.env.ABLY_API_KEY as string});
     const tokenRequestData = await ably.auth.createTokenRequest({ clientId: clientId });
-    console.log("try block for token request", tokenRequestData);
-    res.status(200).json(tokenRequestData);
+    res.status(200).send(tokenRequestData);
   } catch (error) {
-    console.error("Error in createTokenRequest:", error);
     res.status(500).json({ error: "Failed to create token request" });
   }
 }

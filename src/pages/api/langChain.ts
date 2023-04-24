@@ -38,7 +38,7 @@ export async function createAnswerChain(
     llm,
   });
 
-  await chain.call({ summaries, question, conversationHistory, urls }, callbackManager);
+  await chain.call({ summaries, question, conversationHistory, urls });
 
   return chain;
 }

@@ -14,7 +14,8 @@ const fpjsPublicApiKey: string = process.env.FINGERPRINT as string;
 
 const prefix = process.env.API_ROOT || "";
 const clientId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-configureAbly({ authUrl: `${prefix}/api/createTokenRequest`, clientId: clientId });
+
+configureAbly({ authUrl: `${prefix}/api/createTokenRequest`, clientId: clientId, log: {level: 4} });
 console.log("clientId apptsx: ", clientId);
 
 export default function App({ Component, pageProps }: AppProps) {
