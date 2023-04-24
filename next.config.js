@@ -1,3 +1,6 @@
+const { SentryWebpackPlugin } = require("@sentry/webpack-plugin");
+const { version } = require("./package.json");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -6,6 +9,35 @@ const nextConfig = {
   },
   publicRuntimeConfig: {
     apiUrl: process.env.API_URL || "http://localhost:3000",
+  },
+  async headers() {
+    return [
+      {
+        // matching all API routes
+        source: "/api/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Credentials", value: "true" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+          { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
+        ],
+      },
+    ];
+  },
+  webpack: (config, { isServer, buildId }) => {
+    if (!isServer) {
+      config.plugins.push(
+        new SentryWebpackPlugin({
+          include: ".next",
+          ignore: ["node_modules"],
+          urlPrefix: "~/_next",
+          release: `${version}-${buildId}`,
+          configFile: "sentry.client.config.js",
+        })
+      );
+    }
+
+    return config;
   },
 };
 

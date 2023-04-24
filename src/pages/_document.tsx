@@ -1,4 +1,6 @@
 // This file is required by Next.js to render the page on the server.
+// It is also used to add the Katex CSS file to the page.
+// src/pages/_document.tsx
 import { Html, Head, Main, NextScript } from "next/document";
 
 export default function Document() {
