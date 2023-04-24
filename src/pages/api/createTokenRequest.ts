@@ -4,8 +4,10 @@
 // src/pages/api/createTokenRequest.ts
 import Ably from "ably/promises";
 import { NextApiRequest, NextApiResponse } from "next";
+import middleware from "./middleware";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  await middleware.run(req, res);
   const clientId = req.query.clientId as string;
   console.log("createTokenRequest called with clientId:", clientId);
 
