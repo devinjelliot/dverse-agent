@@ -16,7 +16,7 @@ const prefix = process.env.NEXT_PUBLIC_API_ROOT || "";
 const clientId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
 configureAbly({ authUrl: `${prefix}/createTokenRequest`, clientId: clientId, log: {level: 4} });
-console.log("clientId apptsx: ", clientId);
+console.log("clientId apptsx:", clientId);
 
 export default function App({ Component, pageProps }: AppProps) {
 
