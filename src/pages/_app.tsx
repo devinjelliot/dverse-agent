@@ -17,6 +17,7 @@ const clientId = Math.random().toString(36).substring(2, 15) + Math.random().toS
 
 configureAbly({ authUrl: `${prefix}/createTokenRequest?clientId=${encodeURIComponent(clientId)}` as string, clientId: clientId, log: {level: 4} });
 console.log("clientId apptsx:", clientId);
+console.log("STRINGIFY apptsx:", JSON.stringify({ authUrl: `${prefix}/createTokenRequest?clientId=${encodeURIComponent(clientId)}` as string, clientId: clientId, log: {level: 4} }));
 
 export default function App({ Component, pageProps }: AppProps) {
 
