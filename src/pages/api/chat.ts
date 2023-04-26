@@ -62,10 +62,10 @@ const handleRequest = async (params: HandleRequestParams) => {
   //let ably: Ably.Realtime | null = null;
 
   try {
-    const ably = new Ably.Realtime({ authUrl })
+    const ably = new Ably.Realtime({ authUrl } )
     console.log(`fuck me for client ID ${clientId}`);
-    console.log(`Ably client initialized for client ID ${clientId}`);
-    console.log(`Ably client initialized for client ID ${authUrl}`);
+    console.log(`Ably clientId chat.ts ${clientId}`);
+    console.log(`Ably authurl chat.ts ${authUrl}`);
     const channel = createAblyChannel(ably, `clientId:${clientId}`) as Types.RealtimeChannelPromise;
     const interactionId = uuid();
 
@@ -191,7 +191,7 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   const { body } = req;
-  const { prompt, authUrl, clientId } = body;
+  const { prompt, clientId, authUrl } = body;
 
   if (!clientId) {
     res.status(400).json({ "error": "Client ID is missing or undefined" });

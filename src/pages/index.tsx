@@ -16,7 +16,7 @@ import { Types } from "ably";
 import WordGraph from "components/wordGraph";
 import { dummyGraph } from "models/wordGraph";
 
-const API_ROOT = process.env.NEXT_PUBLIC_API_ROOT || "";
+const API_ROOT = process.env.NEXT_PUBLIC_API_ROOT;
 
 type ConversationEntry = {
   message: string;
